@@ -1,0 +1,209 @@
+<!DOCTYPE html>
+<!-- keso 2026/10/15 -->
+
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="konpujylo reverse łukasiewicz notation">
+    <meta name="author" content="evylah">
+    <title>konpylo rłn</title>
+</head>
+
+<body>
+    <h1 class="header">konpylo RŁN</h1>
+    <p>konpylo kep dziejo RŁNa</p>
+
+    <hr>
+
+    <textarea name="input" id="textinput" cols="100" rows="1" spellcheck="false" placeholder="wwimaj RŁNa laježo lukeśdziejowa..."></textarea>
+
+    <!--<p>stack: <span class="stack" id="stack"><span class="code">21,37</span></span> <span class="code">69,42</span></span></p>-->
+    <p><span class="stack" id="stack">[niešo]</span></p>
+    <!-- [niešo] will be replaced with each elemnt in its own <span class="code"></span> thing, and if not empty, it will also have [čedo] i [čodo] -->
+
+    <p>kepaj <span class="code">&nbsp;</span> (konlajo) dzi kyrožnesiu nieže</p>
+    <p class="left">kepkienai lajy:</p> <!-- nie pasiu newline w preview HTMLa -->
+    <ul class="left">
+        <li><span class="code">0</span>~<span class="code">9</span></li>
+        <li><span class="code">+</span></li>
+        <li><span class="code">-</span></li>
+        <li><span class="code">*</span></li>
+        <li><span class="code">/</span></li>
+        <li><span class="code">sqrt</span></li>
+        <li><span class="code">^</span></li>
+        <li><span class="code">%</span> (mod)</li>
+        <li><span class="code">$</span> (swap čodekarai 2ǎ jy)</li>
+        <li><span class="code">&tilde;</span> (weku čodekara jo)</li>
+        <li><span class="code">tau</span> (dodziu τ (6,2831...))</li>
+        <li><span class="code">pi</span> (dodzisu π (3,1415...))</li>
+        <li><span class="code">e</span> (dodzisu e (7,1828...))</li>
+        <li><span class="code">round</span> (zdzisu 2ǎ jy i roundu)</li>
+    </ul>
+
+    <!-- TODO: pasiu button te kopu čodekara luksio stacka to i te clear stack -->
+</body>
+
+</html>
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Lexend+Deca:wght@350&display=swap" rel="stylesheet">
+<style>
+body {
+    font-family: "Lexend Deca", sans-serif;
+    line-height: 1.25;
+}
+
+.header {
+    text-align: center;
+}
+
+h1 {
+    font-size: 24pt;
+}
+
+p {
+    font-size: 14pt;
+    text-align: center;
+}
+.left {
+    text-align: left;
+    margin-left: 15%;
+    margin-right: 15%;
+}
+
+li {
+    font-size: 14pt;
+}
+
+#textinput {
+    text-align: center;
+    display: block;
+    margin-left: auto;
+    margin-right: auto;
+    padding: 5px;
+    border-radius: 10px;
+    border: 2px solid #555588;
+    background-color: #eeeeee;
+    resize: none;
+    font-size: 12pt;
+}
+
+.code { /* monospace shi */
+    font-family: Consolas, 'Courier New', monospace;
+    background-color: #EEEEEE;
+    border-radius: 5px;
+    padding: 2px;
+}
+
+hr {
+    width: 80%;
+}
+</style>
+
+<script>
+function evaluate() {
+    // get input and split by space
+    var userinput = inputbox.value.split(" "); // ["2", "3", "+"]
+    userinput = userinput.filter(a => a !== "");
+
+    // reset stack
+    stack = [];
+    
+    // do shit √√√
+    for (var a of userinput) {
+        console.log(a);
+        // constants (I can't be bothered to make this less stupid)
+        if (a == "tau") {
+            stack.push(Math.PI*2);
+        } else if (a == "pi") {
+            stack.push(Math.PI);
+        } else if (a == "e") {
+            stack.push(Math.E);
+        } else if (!isNaN(parseFloat(a.replace(",", ".")))) {
+            // luksio (replace , with . cuz js and then try to float)
+            stack.push(parseFloat(a.replace(",", ".")));
+        } else {
+            // operacja
+            var x = stack.pop(); // only pop x for 1operand operacje
+
+            switch (a) {
+                case "+":
+                    stack.push(stack.pop() + x);
+                    break;
+                case "-":
+                    stack.push(stack.pop() - x);
+                    break;
+                case "*":
+                    stack.push(stack.pop() * x);
+                    break;
+                case "/":
+                    stack.push(stack.pop() / x);
+                    break;
+                case "%":
+                    stack.push(stack.pop() % x);
+                    break;
+                case "^":
+                    stack.push(stack.pop() ** x);
+                    break;
+                case "$":
+                    var y = stack.pop(y);
+                    stack.push(x); stack.push(y);
+                    break;
+                case "~":
+                    break;
+                case "sqrt":
+                    stack.push(Math.sqrt(x));
+                    break;
+                case "round":
+                    stack.push(Math.round(stack.pop() * 10**x) / 10**x) // round to decimal places cuz js
+                    break;
+                // constant
+                case "tau":
+                    stack.push(x);
+                    stack.push(Math.PI*2);
+                    break;
+                case "pi":
+                    stack.push(y); stack.push(x);
+                    stack.push(Math.PI);
+                    break;
+                default:
+                    stack.push(x);
+                    // return x
+            }
+        }
+    }
+    zwimuStack();
+}
+
+function formatNumber(number) {
+    return number.toLocaleString("pl-PL", {useGrouping: false, maximumFractionDigits: 7, minimumFractionDigits: 0});
+}
+
+function zwimuStack() {
+    // goal: make smth like <span class="code">blać</span> <span class="code">2137,69</span>
+    // console.log(stack.length)
+    if (stack.length == 0) {
+        stackoutput.innerHTML = "[niešo]";
+        return;
+    }
+
+    console.log(stack)
+
+    // modify stack to have <span> and shi (it gets reset so it's ok)
+    stack = stack.map(a => formatNumber(a)); // convert numbers to string
+    stack = stack.map(a => `<span class="code">${a}</span>`) // add <span> shit
+
+    stackoutput.innerHTML = `stack: ${stack.join(" ")}`;
+}
+
+var stack = [2];
+
+const inputbox = document.getElementById("textinput");
+inputbox.addEventListener("input", evaluate);
+
+const stackoutput = document.getElementById("stack");
+
+</script>
